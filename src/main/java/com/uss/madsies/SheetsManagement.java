@@ -105,6 +105,20 @@ public class SheetsManagement
         }
     }
 
+    static String getPublicSheet() throws IOException
+    {
+        InputStream in = Main.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        if (in == null) {
+            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+        }
+
+        try (Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+            JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+            return json.get("public_sheet").getAsString();
+        }
+    }
+
+
     public static void createNewSheet() throws IOException {
         SheetProperties sheetProperties = new SheetProperties();
         int num = getSheetNumber() + 1;

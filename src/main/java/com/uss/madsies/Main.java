@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class Main {
 
     static String ADMIN_SHEET; // Stored privately
-    static String PUBLIC_SHEET = "1HRoTkeSpNUK4u2ft08EimauMcTNlndrIYl-gLZUy-8E";
+    static String PUBLIC_SHEET ;
     static List<TeamData> teamsInfo = new ArrayList<>();
     static List<MatchUp> matches = new ArrayList<>();
     static boolean isCurrentMatch = false;
@@ -25,6 +25,7 @@ public class Main {
         // Build a new authorized API client service.
         SheetsManagement.generateService();
         ADMIN_SHEET = SheetsManagement.getAdminSheet();
+        PUBLIC_SHEET = SheetsManagement.getPublicSheet();
 
         getFullData();
 
@@ -519,36 +520,37 @@ public class Main {
             if (team.teamName.equals(name)) return team;
 
         }
-        throw new RuntimeException();
+        return null;
     }
 
     /**
      * Loads the current round if the client is closed whilst a round is in progress
      */
 
-    public static void loadCurrentMatch()
-    {
+    public static void loadCurrentMatch() {
         try {
             int num = SheetsManagement.getSheetNumber();
             List<List<Object>> data = SheetsManagement.fetchData(ADMIN_SHEET, "Match_" + num + "!A1:D");
 
             for (List<Object> row : data) {
+                if (row.isEmpty()) continue;
+                if ( getTeamFromName(row.get(1).toString()) == null || getTeamFromName(row.get(0).toString()) == null) continue;
                 if (Objects.equals(row.get(0).toString(), "BYE"))
                 {
-                    matches.add(new MatchUp(new TeamData("BYE", -1), getTeamFromName(row.get(3).toString())));
+                    matches.add(new MatchUp(new TeamData("BYE", -1), getTeamFromName(row.get(1).toString())));
                 }
-                else if (Objects.equals(row.get(3).toString(), "BYE"))
+                else if (Objects.equals(row.get(1).toString(), "BYE"))
                 {
                     matches.add(new MatchUp(getTeamFromName(row.getFirst().toString()), new TeamData("BYE", -1)));
                 } else
                 {
-                    matches.add(new MatchUp(getTeamFromName(row.get(0).toString()), getTeamFromName(row.get(3).toString())));
+                    matches.add(new MatchUp(getTeamFromName(row.get(0).toString()), getTeamFromName(row.get(1).toString())));
                 }
             }
         }
         catch (Exception e)
         {
-            System.out.println(e.getMessage());
+            System.out.println("LOAD ERROR:"+ e.getMessage());
         }
     }
     

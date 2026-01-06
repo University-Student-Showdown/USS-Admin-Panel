@@ -174,7 +174,6 @@ public class GUIView
             copyUnfinished.setVisible(true);
         }
 
-
         JPanel matchPanel = new JPanel(new GridLayout(2,3,15,15));
         matchPanel.setBorder(BorderFactory.createTitledBorder("Matches"));
         matchPanel.add(generateMatches);
