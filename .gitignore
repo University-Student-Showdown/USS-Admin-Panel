@@ -48,3 +48,4 @@ src/main/Python/credentials.json
 src/main/Python/__pycache__/bot.cpython-311.pyc
 .idea/inspectionProfiles/Project_Default.xml
 token.json
+/src/main/Python/

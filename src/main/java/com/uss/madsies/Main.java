@@ -19,23 +19,25 @@ public class Main {
     static List<MatchUp> matches = new ArrayList<>();
     static boolean isCurrentMatch = false;
     static HashMap<String, List<Integer>> teamPlayers = new HashMap<>();
+    static Game GAME;
 
     public static void main(String... args) throws IOException, GeneralSecurityException
     {
         // Build a new authorized API client service.
         SheetsManagement.generateService();
+        GAME = Game.valueOf(SheetsManagement.getGame());
         ADMIN_SHEET = SheetsManagement.getAdminSheet();
         PUBLIC_SHEET = SheetsManagement.getPublicSheet();
+
 
         getFullData();
 
         isCurrentMatch = SheetsManagement.readMatchFlag();
         if (isCurrentMatch) loadCurrentMatch();
 
-
         // Initialise GUI
         SwingUtilities.invokeLater(() -> {
-            GUIView view  = new GUIView();
+            GUIView view = new GUIView(GAME);
             view.show();
             view.setMatchStatus(isCurrentMatch);
         });
@@ -160,6 +162,11 @@ public class Main {
         isCurrentMatch = true;
     }
 
+    /**
+     * Cancels round, reverting any completed matches as if the round was never started.
+     *
+     * @throws IOException
+     */
     public static void cancelRound() throws IOException
     {
         if (!isCurrentMatch)
@@ -201,7 +208,6 @@ public class Main {
     {
         sortTeams(false);
         List<List<Object>> sheetData = new ArrayList<>();
-        //sheetData.add(Arrays.asList("Ranking", "Team", "Score", "Wins", "Losses", "OMWP"));
         int i = 1;
         for (TeamData t : teamsInfo)
         {
@@ -307,7 +313,6 @@ public class Main {
             String teamName = t.teamName;
             if (teamName.equals(team))
             {
-                //t.history.(opponent);
                 t.history.set(round - 1, opponent);
                 return;
             }
@@ -327,12 +332,10 @@ public class Main {
             roundNumber = 0;
         }
 
-
         for (TeamData team : teamsInfo)
         {
             teamRecords.put(team.teamName, new int[]{team.wins, team.losses});
         }
-
 
         for (TeamData team : teamsInfo)
         {
@@ -355,8 +358,6 @@ public class Main {
                 sum += winPct;
                 count++;
             }
-
-
 
             team.omwp = BigDecimal.valueOf((count == 0) ? 0 : sum / count).setScale(4, RoundingMode.HALF_UP).doubleValue();
 
@@ -478,10 +479,23 @@ public class Main {
             if (row.isEmpty()) continue;
             String name = row.getFirst().toString();
             if (name.isEmpty()) continue;
-            teamPlayers.put(name, new ArrayList<>(row.subList(2, row.size()))
-                    .stream().map(o -> Integer.parseInt(o.toString())).collect(Collectors.toList()));
+            try {
+                teamPlayers.put(name, new ArrayList<>(row.subList(2, row.size()))
+                        .stream().map(o -> Integer.parseInt(o.toString())).collect(Collectors.toList()));
+            }
+            catch (Exception e)
+            {
+                System.out.println(e);
+            }
+
         }
     }
+
+    /**
+        Used before tournament start after all teams have been signed-up
+        Gives wins based off of initial seeding to improve week 1 game quality.
+
+     */
 
     public static void grantSeedingWins()
     {

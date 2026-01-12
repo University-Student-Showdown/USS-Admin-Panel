@@ -19,9 +19,10 @@ public class GUIView
         this.matchStatus = ms;
     }
 
-    public GUIView() {
+    public GUIView(Game game) {
         matchStatus = Main.isCurrentMatch;
-        frame = new JFrame("USS Admin Control Panel:");
+        String title = "USS Admin Control Panel - %s";
+        frame = new JFrame(String.format(title, game.toString()));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new GridLayout(3,1,10,10));
 

@@ -34,6 +34,19 @@ public class SheetsManagement
 
     static Sheets service;
     static String ADMIN_SHEET;
+    static String GAME;
+
+    static {
+        try {
+            GAME = getGame();
+            ADMIN_SHEET = getAdminSheet();
+        } catch (IOException e) {
+            GAME = null;
+            ADMIN_SHEET = null;
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public static void generateService() throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -50,17 +63,25 @@ public class SheetsManagement
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
+
         GoogleClientSecrets clientSecrets =
                 GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
+        GoogleAuthorizationCodeFlow flow =
+        new GoogleAuthorizationCodeFlow.Builder(
+                HTTP_TRANSPORT,
+                JSON_FACTORY,
+                clientSecrets,
+                SCOPES)
+                .setDataStoreFactory(
+                        new FileDataStoreFactory(new File(TOKENS_DIRECTORY_PATH)))
                 .setAccessType("offline")
+                .setApprovalPrompt("force")
                 .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        ADMIN_SHEET = getAdminSheet();
+
+        LocalServerReceiver receiver =
+                new LocalServerReceiver.Builder().setPort(8888).build();
+
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
@@ -101,7 +122,27 @@ public class SheetsManagement
 
         try (Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
             JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
-            return json.get("admin_sheet").getAsString();
+            if (!json.has(GAME)) {
+                throw new IllegalStateException("Game not found in credentials.json: " + GAME);
+            }
+
+            return json
+                .getAsJsonObject(GAME)
+                .get("admin_sheet")
+                .getAsString();
+        }
+    }
+
+    static String getGame() throws IOException
+    {
+        InputStream in = Main.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        if (in == null) {
+            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+        }
+
+        try (Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+            JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+            return json.get("game").getAsString();
         }
     }
 
@@ -114,7 +155,14 @@ public class SheetsManagement
 
         try (Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
             JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
-            return json.get("public_sheet").getAsString();
+            if (!json.has(GAME)) {
+                throw new IllegalStateException("Game not found in credentials.json: " + GAME);
+            }
+
+            return json
+            .getAsJsonObject(GAME)
+            .get("public_sheet")
+            .getAsString();
         }
     }
 
