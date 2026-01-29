@@ -36,13 +36,21 @@ public class MatchesGUI {
         frame.add(scrollPane, BorderLayout.CENTER);
 
         // Panel for buttons
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 5, 5));
-        JButton updateButton = new JButton("Update Scores");
+        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 5, 5));
+
         JButton fetchButton = new JButton("Reload Matches");
-        updateButton.addActionListener(e -> applyScoreChanges());
+
         fetchButton.addActionListener(e -> refreshData());
-        buttonPanel.add(updateButton);
+
         buttonPanel.add(fetchButton);
+
+        JButton swapButton = new JButton("Swap Teams");
+        swapButton.addActionListener(e -> swapSelectedMatches());
+        buttonPanel.add(swapButton);
+
+        JButton updateButton = new JButton("Update Scores");
+        updateButton.addActionListener(e -> applyScoreChanges());
+        buttonPanel.add(updateButton);
 
         frame.add(buttonPanel, BorderLayout.EAST);
 
@@ -63,8 +71,9 @@ public class MatchesGUI {
         catch (IOException e) {
             e.printStackTrace();
         }
-
     }
+
+
 
     private void startTitleRefreshTimer(Game game) {
         Timer timer = new Timer(500, e -> {
@@ -91,14 +100,42 @@ public class MatchesGUI {
     }
 
     private void applyScoreChanges() {
-        for (int i = 0; i < matches.size(); i++) {
-            MatchUp m = matches.get(i);
-            int homeScore = (int) tableModel.getValueAt(i, 1);
-            int awayScore = (int) tableModel.getValueAt(i, 2);
-            m.score1 = (homeScore);
-            m.score2 = (awayScore);
-        }
+        matches = tableModel.getMatches();
+        Main.updateAndWriteMatches((ArrayList<MatchUp>) matches);
         JOptionPane.showMessageDialog(frame, "Scores updated!");
+        refreshData();
+    }
+
+    private void swapSelectedMatches() {
+        int[] selectedRows = table.getSelectedRows();
+
+        if (selectedRows.length != 2) {
+            JOptionPane.showMessageDialog(
+                    frame,
+                    "Please select exactly two matches to swap.",
+                    "Invalid Selection",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        int r1 = selectedRows[0];
+        int r2 = selectedRows[1];
+
+        List<MatchUp> list = tableModel.getMatches();
+
+        MatchUp m1 = list.get(r1);
+        MatchUp m2 = list.get(r2);
+
+        // Swap team2 of match 1 with team1 of match 2
+        var temp = m1.team2;
+        m1.team2 = m2.team1;
+        m2.team1 = temp;
+
+        tableModel.fireTableRowsUpdated(
+                Math.min(r1, r2),
+                Math.max(r1, r2)
+        );
     }
 
     // Table model for matches
@@ -109,6 +146,11 @@ public class MatchesGUI {
         public void setMatches(List<MatchUp> matches) {
             this.matches = matches;
             fireTableDataChanged();
+        }
+
+        public List<MatchUp> getMatches() {
+
+            return matches;
         }
 
         @Override

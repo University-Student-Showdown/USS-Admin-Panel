@@ -75,8 +75,6 @@ public class GUIView
             }}
             );
 
-        reset.setEnabled(false);
-
         JButton setAllCheckIn = new JButton("Set All Check In");
         setAllCheckIn.addActionListener(a -> Main.checkAllTeams(true));
 

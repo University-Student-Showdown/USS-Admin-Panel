@@ -101,6 +101,29 @@ public class Main {
         return matches;
     }
 
+    public static void updateAndWriteMatches(ArrayList<MatchUp> newMatches)
+    {
+        matches = newMatches;
+        try {
+            int num = SheetsManagement.getSheetNumber();
+            String range = "Match_"+num+"!A1";
+            List<List<Object>> values = new ArrayList<>();
+
+            // Headers for sheet (Readability)
+            values.add(Arrays.asList("Team A", "Team B", "Team A Score", "Team B Score", "Team A Seed", "Team B Seed"));
+
+            // Data
+            for (MatchUp match : matches) {
+                values.add(Arrays.asList(match.team1.teamName, match.team2.teamName, match.score1, match.score2, match.team1.seedingRank, match.team2.seedingRank));
+            }
+            SheetsManagement.writeData(values, ADMIN_SHEET, range);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     /**
         Reads data from match sheet and updates win/losses accordingly
      */
