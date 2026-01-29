@@ -1,4 +1,7 @@
-package com.uss.madsies;
+package com.uss.madsies.view;
+
+import com.uss.madsies.Game;
+import com.uss.madsies.Main;
 
 import javax.swing.*;
 import java.awt.*;

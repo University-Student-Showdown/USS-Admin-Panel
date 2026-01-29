@@ -47,7 +47,6 @@ public class SheetsManagement
         }
     }
 
-
     public static void generateService() throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentialsRefresh(HTTP_TRANSPORT))
@@ -55,34 +54,43 @@ public class SheetsManagement
                 .build();
     }
 
-
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
-            throws IOException {
+    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Load client secrets.
         InputStream in = Main.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
 
-        GoogleClientSecrets clientSecrets =
-                GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
-        GoogleAuthorizationCodeFlow flow =
-        new GoogleAuthorizationCodeFlow.Builder(
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                 HTTP_TRANSPORT,
                 JSON_FACTORY,
                 clientSecrets,
                 SCOPES)
-                .setDataStoreFactory(
-                        new FileDataStoreFactory(new File(TOKENS_DIRECTORY_PATH)))
+                .setDataStoreFactory(new FileDataStoreFactory(new File(TOKENS_DIRECTORY_PATH)))
                 .setAccessType("offline")
-                .setApprovalPrompt("force")
                 .build();
 
-        LocalServerReceiver receiver =
-                new LocalServerReceiver.Builder().setPort(8888).build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
 
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+
+        // If token is expired or invalid, try refreshing
+        if (credential.getAccessToken() == null || (credential.getExpiresInSeconds() != null && credential.getExpiresInSeconds() <= 60)) {
+            System.out.println("Access token expired or missing. Attempting to refresh...");
+
+            boolean success = credential.refreshToken();
+            if (!success) {
+                System.out.println("Failed to refresh token. Please reauthorize.");
+                // Re-authorize interactively
+                credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+            } else {
+                System.out.println("Token successfully refreshed.");
+            }
+        }
+
+        return credential;
     }
 
     private static Credential getCredentialsRefresh(final NetHttpTransport HTTP_TRANSPORT)

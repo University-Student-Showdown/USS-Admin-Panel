@@ -1,5 +1,8 @@
 package com.uss.madsies;
 
+import com.uss.madsies.view.GUIView;
+import com.uss.madsies.view.MatchesGUI;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
@@ -17,7 +20,7 @@ public class Main {
     static String PUBLIC_SHEET ;
     static List<TeamData> teamsInfo = new ArrayList<>();
     static List<MatchUp> matches = new ArrayList<>();
-    static boolean isCurrentMatch = false;
+    public static boolean isCurrentMatch = false;
     static HashMap<String, List<Integer>> teamPlayers = new HashMap<>();
     static Game GAME;
 
@@ -28,7 +31,6 @@ public class Main {
         GAME = Game.valueOf(SheetsManagement.getGame());
         ADMIN_SHEET = SheetsManagement.getAdminSheet();
         PUBLIC_SHEET = SheetsManagement.getPublicSheet();
-
 
         getFullData();
 
@@ -41,6 +43,7 @@ public class Main {
             view.show();
             view.setMatchStatus(isCurrentMatch);
         });
+        SwingUtilities.invokeLater(() -> new MatchesGUI(GAME));
     }
 
     /**
@@ -70,6 +73,32 @@ public class Main {
         }
 
         SheetsManagement.writeData(values, ADMIN_SHEET, range);
+    }
+
+    public static void grabLiveMatch() throws IOException
+    {
+        if (!isCurrentMatch) return;
+        int num = SheetsManagement.getSheetNumber();
+        String range = "Match_"+num+"!A2:D";
+
+        List<List<Object>> data = SheetsManagement.fetchData(ADMIN_SHEET, range);
+
+        int match = 0;
+        for(List<Object> row : data)
+        {
+            if (row.size() < 4) continue;
+            if (match >= matches.size()) continue;
+
+            matches.get(match).score1 = Integer.parseInt(row.get(2).toString());
+            matches.get(match).score2 = Integer.parseInt(row.get(3).toString());
+            match++;
+        }
+        System.out.println(matches);
+    }
+
+    public static List<MatchUp> getMatches()
+    {
+        return matches;
     }
 
     /**
@@ -548,18 +577,32 @@ public class Main {
 
             for (List<Object> row : data) {
                 if (row.isEmpty()) continue;
-                if ( getTeamFromName(row.get(1).toString()) == null || getTeamFromName(row.get(0).toString()) == null) continue;
-                if (Objects.equals(row.get(0).toString(), "BYE"))
-                {
-                    matches.add(new MatchUp(new TeamData("BYE", -1), getTeamFromName(row.get(1).toString())));
+
+                String teamA = row.get(0).toString();
+                String teamB = row.get(1).toString();
+
+                if (Objects.equals(teamA, "BYE")) {
+                    matches.add(new MatchUp(
+                            new TeamData("BYE", -1),
+                            getTeamFromName(teamB)
+                    ));
+                    continue;
                 }
-                else if (Objects.equals(row.get(1).toString(), "BYE"))
-                {
-                    matches.add(new MatchUp(getTeamFromName(row.getFirst().toString()), new TeamData("BYE", -1)));
-                } else
-                {
-                    matches.add(new MatchUp(getTeamFromName(row.get(0).toString()), getTeamFromName(row.get(1).toString())));
+
+                if (Objects.equals(teamB, "BYE")) {
+                    matches.add(new MatchUp(
+                            getTeamFromName(teamA),
+                            new TeamData("BYE", -1)
+                    ));
+                    continue;
                 }
+
+                TeamData t1 = getTeamFromName(teamA);
+                TeamData t2 = getTeamFromName(teamB);
+
+                if (t1 == null || t2 == null) continue;
+
+                matches.add(new MatchUp(t1, t2));
             }
         }
         catch (Exception e)
