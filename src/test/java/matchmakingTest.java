@@ -1,6 +1,6 @@
-import com.uss.madsies.MatchUp;
+import com.uss.madsies.data.MatchUp;
 import com.uss.madsies.Matchmaker;
-import com.uss.madsies.TeamData;
+import com.uss.madsies.data.TeamData;
 import jdk.jfr.Description;
 import org.junit.jupiter.api.Test;
 

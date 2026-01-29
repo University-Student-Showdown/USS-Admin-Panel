@@ -1,4 +1,4 @@
-package com.uss.madsies;
+package com.uss.madsies.data;
 
 public enum Game {
     OVERWATCH,

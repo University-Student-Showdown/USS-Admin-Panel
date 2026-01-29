@@ -1,5 +1,8 @@
 package com.uss.madsies;
 
+import com.uss.madsies.data.Game;
+import com.uss.madsies.data.MatchUp;
+import com.uss.madsies.data.TeamData;
 import com.uss.madsies.view.GUIView;
 import com.uss.madsies.view.MatchesGUI;
 

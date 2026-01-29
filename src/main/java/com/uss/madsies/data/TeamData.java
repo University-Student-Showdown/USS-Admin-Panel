@@ -1,4 +1,4 @@
-package com.uss.madsies;
+package com.uss.madsies.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,8 +21,8 @@ public class TeamData
     public int map_wins;
     public int map_losses;
     public double omwp;
-    List<String> history = new ArrayList<>(Arrays.asList("", "", "", "", "", "", "", "", "", "", "", "", "", "", ""));
-    List<Integer> players = new ArrayList<>();
+    public List<String> history = new ArrayList<>(Arrays.asList("", "", "", "", "", "", "", "", "", "", "", "", "", "", ""));
+    public List<Integer> players = new ArrayList<>();
     public int seedingRank = 999;
 
     /*

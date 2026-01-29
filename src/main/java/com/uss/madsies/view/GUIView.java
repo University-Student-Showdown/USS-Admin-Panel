@@ -1,6 +1,6 @@
 package com.uss.madsies.view;
 
-import com.uss.madsies.Game;
+import com.uss.madsies.data.Game;
 import com.uss.madsies.Main;
 
 import javax.swing.*;
@@ -116,8 +116,6 @@ public class GUIView
                     JOptionPane.showMessageDialog(frame, e.getMessage());
                 }
         });
-
-
 
         endMatches.addActionListener(a -> {
         int result = JOptionPane.showConfirmDialog(

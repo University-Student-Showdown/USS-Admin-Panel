@@ -1,5 +1,8 @@
 package com.uss.madsies;
 
+import com.uss.madsies.data.MatchUp;
+import com.uss.madsies.data.TeamData;
+
 import java.util.*;
 
 public class Matchmaker {
