@@ -2,12 +2,12 @@ package com.uss.madsies.view;
 
 import com.uss.madsies.data.Game;
 import com.uss.madsies.Main;
+import com.uss.madsies.managers.RoundManager;
+import com.uss.madsies.managers.TeamsManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
 
 public class GUIView
 {
@@ -19,6 +19,8 @@ public class GUIView
     public JButton copyMatches;
     public JButton copyUnfinished;
     public TextArea errorText;
+    private final RoundManager _roundManager;
+    private final TeamsManager _teamsManager;
 
     public boolean matchStatus;
 
@@ -27,8 +29,10 @@ public class GUIView
         this.matchStatus = ms;
     }
 
-    public GUIView(Game game) {
-        matchStatus = Main.isCurrentMatch;
+    public GUIView(Game game, RoundManager roundManager, TeamsManager teamsManager) {
+        _roundManager = roundManager;
+        _teamsManager = teamsManager;
+        matchStatus = _roundManager.isCurrentMatch;
         String title = "USS Admin Control Panel - %s";
         frame = new JFrame(String.format(title, game.toString()));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -76,15 +80,15 @@ public class GUIView
             if (result == JOptionPane.YES_OPTION)
             {
                 Main.wipeData();
-                Main.addSeedAndCreateTeams();
+                _teamsManager.addSeedAndCreateTeams();
             }}
             );
 
         JButton setAllCheckIn = new JButton("Set All Check In");
-        setAllCheckIn.addActionListener(a -> Main.checkAllTeams(true));
+        setAllCheckIn.addActionListener(a -> _teamsManager.checkAllTeams(true));
 
         JButton setAllCheckOut = new JButton("Set All Check Out");
-        setAllCheckOut.addActionListener(a -> Main.checkAllTeams(false));
+        setAllCheckOut.addActionListener(a -> _teamsManager.checkAllTeams(false));
 
         sortingPanel.add(sortSeeding);
         sortingPanel.add(sortPlacement);
@@ -97,10 +101,10 @@ public class GUIView
         generateMatches = new JButton("Generate Matches");
         copyMatches = new JButton("Copy Matches to Clipboard");
         copyUnfinished = new JButton("Copy Unfinished Matches to Clipboard");
-        copyMatches.addActionListener(a -> {Main.copyRound();JOptionPane.showMessageDialog(frame, "Copied to clipboard");});
+        copyMatches.addActionListener(a -> {_roundManager.copyRound();JOptionPane.showMessageDialog(frame, "Copied to clipboard");});
         generateMatches.addActionListener(a -> {
             try {
-                Main.generateRound();
+                _roundManager.generateRound();
                 endMatches.setVisible(true);
                 cancelMatches.setVisible(true);
                 copyMatches.setVisible(true);
@@ -115,7 +119,7 @@ public class GUIView
 
         copyUnfinished.addActionListener(a -> {
                 try {
-                    Main.copyMissingMatches();
+                    _roundManager.copyMissingMatches();
                     JOptionPane.showMessageDialog(frame, "Copied to clipboard");
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(frame, e.getMessage());
@@ -133,7 +137,7 @@ public class GUIView
 
         if (result == JOptionPane.YES_OPTION) {
             try {
-                Main.endRound();
+                _roundManager.endRound();
                 endMatches.setVisible(false);
                 cancelMatches.setVisible(false);
                 copyMatches.setVisible(false);
@@ -154,7 +158,7 @@ public class GUIView
             );
             if (result == JOptionPane.YES_OPTION) {
                 try {
-                    Main.cancelRound();
+                    _roundManager.cancelRound();
                     endMatches.setVisible(false);
                     cancelMatches.setVisible(false);
                     copyMatches.setVisible(false);
@@ -192,7 +196,7 @@ public class GUIView
 
         JButton copyUnreadyTeams = new JButton("Copy List of non-checked in teams");
         copyUnreadyTeams.addActionListener(a ->
-        {Main.copyNonCheckedIn();JOptionPane.showMessageDialog(frame, "Copied to clipboard");});
+        {_teamsManager.copyNonCheckedIn();JOptionPane.showMessageDialog(frame, "Copied to clipboard");});
 
         JPanel publicPanel = new JPanel(new GridLayout(1,2,15,15));
         publicPanel.setBorder(BorderFactory.createTitledBorder("Public"));
@@ -214,8 +218,8 @@ public class GUIView
 
     private void refreshTimer() {
         Timer timer = new Timer(2000, e -> {
-            Main.refreshCurrentMatch();
-            setMatchStatus(Main.isCurrentMatch);
+            _roundManager.refreshCurrentMatch();
+            setMatchStatus(_roundManager.isCurrentMatch);
 
             if (!matchStatus) {
                 endMatches.setVisible(false);

@@ -2,6 +2,8 @@ package com.uss.madsies.view;
 import com.uss.madsies.data.Game;
 import com.uss.madsies.Main;
 import com.uss.madsies.data.MatchUp;
+import com.uss.madsies.managers.RoundManager;
+import com.uss.madsies.managers.TeamsManager;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -20,12 +22,16 @@ public class MatchesGUI {
     private final JTable table;
     private Instant sinceLastRefresh = Instant.now().minus(Duration.ofSeconds(60));
     static List<MatchUp> matches = new ArrayList<>();
+    private RoundManager _roundManager;
+    private TeamsManager _teamsManager;
 
     private enum Side {
         LEFT, RIGHT
     }
 
-    public MatchesGUI(Game game) {
+    public MatchesGUI(Game game, RoundManager roundManager, TeamsManager teamsManager) {
+        _roundManager = roundManager;
+        _teamsManager = teamsManager;
         String title = "Current Round: " + game;
         frame = new JFrame(title);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -84,8 +90,8 @@ public class MatchesGUI {
     private void refreshData()
     {
         try {
-            Main.grabLiveMatch();
-            tableModel.setMatches(Main.getMatches());
+            _roundManager.grabLiveMatch();
+            tableModel.setMatches(_roundManager.getMatches());
             sinceLastRefresh = Instant.now();
         }
         catch (IOException e) {
@@ -123,12 +129,12 @@ public class MatchesGUI {
     }
 
     private void grabMatchStatus() {
-        this.matchStatus = Main.isCurrentMatch;
+        this.matchStatus = _roundManager.isCurrentMatch;
     }
 
     private void applyScoreChanges() {
         matches = tableModel.getMatches();
-        Main.updateAndWriteMatches((ArrayList<MatchUp>) matches);
+        _roundManager.updateAndWriteMatches((ArrayList<MatchUp>) matches);
         JOptionPane.showMessageDialog(frame, "Scores updated!");
         refreshData();
     }
