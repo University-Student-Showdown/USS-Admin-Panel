@@ -1,4 +1,4 @@
-package com.uss.madsies;
+package com.uss.madsies.managers;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -15,6 +15,7 @@ import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.uss.madsies.Main;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -23,20 +24,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SheetsManagement
+public class SheetsManager
 {
-    private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
-    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
-    private static final List<String> SCOPES =
+    private final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
+    private final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+    private final String TOKENS_DIRECTORY_PATH = "tokens";
+    private final List<String> SCOPES =
             Collections.singletonList(SheetsScopes.SPREADSHEETS);
-    private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
+    private final String CREDENTIALS_FILE_PATH = "/credentials.json";
 
-    static Sheets service;
-    static String ADMIN_SHEET;
-    static String GAME;
+    Sheets service;
+    String ADMIN_SHEET;
+    String GAME;
 
-    static {
+    {
         try {
             GAME = getGame();
             ADMIN_SHEET = getAdminSheet();
@@ -47,14 +48,14 @@ public class SheetsManagement
         }
     }
 
-    public static void generateService() throws GeneralSecurityException, IOException {
+    public void generateService() throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentialsRefresh(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
 
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+    private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Load client secrets.
         InputStream in = Main.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
@@ -93,7 +94,7 @@ public class SheetsManagement
         return credential;
     }
 
-    private static Credential getCredentialsRefresh(final NetHttpTransport HTTP_TRANSPORT)
+    private  Credential getCredentialsRefresh(final NetHttpTransport HTTP_TRANSPORT)
             throws IOException {
         Credential credential = getCredentials(HTTP_TRANSPORT);
 
@@ -121,7 +122,7 @@ public class SheetsManagement
         return credential;
     }
 
-    static String getAdminSheet() throws IOException
+     public String getAdminSheet() throws IOException
     {
         InputStream in = Main.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
@@ -141,7 +142,7 @@ public class SheetsManagement
         }
     }
 
-    static String getGame() throws IOException
+    public String getGame() throws IOException
     {
         InputStream in = Main.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
@@ -154,7 +155,7 @@ public class SheetsManagement
         }
     }
 
-    static String getPublicSheet() throws IOException
+    public String getPublicSheet() throws IOException
     {
         InputStream in = Main.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
@@ -175,7 +176,7 @@ public class SheetsManagement
     }
 
 
-    public static void createNewSheet() throws IOException {
+    public void createNewSheet() throws IOException {
         SheetProperties sheetProperties = new SheetProperties();
         int num = getSheetNumber() + 1;
         setSheetNumber(num);
@@ -196,7 +197,7 @@ public class SheetsManagement
         service.spreadsheets().batchUpdate(ADMIN_SHEET, batchUpdateRequest).execute();
     }
 
-    public static void deleteSheet(String sheetName) throws IOException
+    public void deleteSheet(String sheetName) throws IOException
     {
         Spreadsheet spreadsheet = service.spreadsheets().get(ADMIN_SHEET).execute();
         Integer sheetId = null;
@@ -223,7 +224,7 @@ public class SheetsManagement
         service.spreadsheets().batchUpdate(ADMIN_SHEET, body).execute();
     }
 
-    public static int getSheetNumber() throws IOException
+    public int getSheetNumber() throws IOException
     {
         String range = "Datasheet!Z1";
         List<List<Object>> fetchedData = fetchData(ADMIN_SHEET, range);
@@ -231,14 +232,14 @@ public class SheetsManagement
         return Integer.parseInt(fetchedData.getFirst().getFirst().toString());
     }
 
-    public static void setSheetNumber(int val) throws IOException {
+    public void setSheetNumber(int val) throws IOException {
         String range = "Datasheet!Z1";
         List<List<Object>> values = new ArrayList<>();
         values.add(List.of(val));
         writeData(values, ADMIN_SHEET, range);
     }
 
-    public static List<List<Object>> fetchData(String SHEET, String range)
+    public List<List<Object>> fetchData(String SHEET, String range)
     {
         ValueRange response;
         try {
@@ -262,7 +263,7 @@ public class SheetsManagement
         return data;
     }
 
-    public static void writeData(List<List<Object>> inputData, String SHEET, String range)
+    public void writeData(List<List<Object>> inputData, String SHEET, String range)
     {
         ValueRange body = new ValueRange().setValues(inputData);
         try
@@ -278,7 +279,7 @@ public class SheetsManagement
 
     }
 
-    public static void clearData(String range) {
+    public void clearData(String range) {
         ClearValuesRequest requestBody = new ClearValuesRequest();
 
         try {
@@ -292,7 +293,7 @@ public class SheetsManagement
         }
     }
 
-    public static boolean readMatchFlag()
+    public boolean readMatchFlag()
     {
         List<List<Object>> data = fetchData(ADMIN_SHEET, "Datasheet!Y1");
         if (data.isEmpty()) return false;
@@ -300,13 +301,13 @@ public class SheetsManagement
         return Boolean.parseBoolean(data.getFirst().getFirst().toString());
     }
 
-    public static void writeMatchFlag(boolean flag)
+    public void writeMatchFlag(boolean flag)
     {
         List<List<Object>> data = new ArrayList<>(List.of(List.of(flag)));
         writeData(data, ADMIN_SHEET, "Datasheet!Y1");
     }
 
-    public static void reduceSheetNumber()
+    public void reduceSheetNumber()
     {
         try
         {
