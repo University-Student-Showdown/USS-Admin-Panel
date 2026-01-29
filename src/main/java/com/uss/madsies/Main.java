@@ -54,6 +54,10 @@ public class Main {
      *
      * @param matches Current list of matches in round
      */
+    public static void refreshCurrentMatch() {
+        isCurrentMatch = SheetsManagement.readMatchFlag();
+    }
+
     public static void writeMatchupSheet(List<MatchUp> matches) throws IOException
     {
         int num = SheetsManagement.getSheetNumber();

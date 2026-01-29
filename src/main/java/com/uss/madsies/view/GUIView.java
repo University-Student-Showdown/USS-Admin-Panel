@@ -6,6 +6,8 @@ import com.uss.madsies.Main;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 
 public class GUIView
 {
@@ -13,6 +15,9 @@ public class GUIView
     private final JButton cancelMatches;
     public JButton endMatches;
     public JButton updatePublicBoard;
+    public JButton generateMatches;
+    public JButton copyMatches;
+    public JButton copyUnfinished;
     public TextArea errorText;
 
     public boolean matchStatus;
@@ -89,9 +94,9 @@ public class GUIView
 
         cancelMatches = new JButton("Cancel Matches");
         endMatches = new JButton("End Matches");
-        JButton generateMatches = new JButton("Generate Matches");
-        JButton copyMatches = new JButton("Copy Matches to Clipboard");
-        JButton copyUnfinished = new JButton("Copy Unfinished Matches to Clipboard");
+        generateMatches = new JButton("Generate Matches");
+        copyMatches = new JButton("Copy Matches to Clipboard");
+        copyUnfinished = new JButton("Copy Unfinished Matches to Clipboard");
         copyMatches.addActionListener(a -> {Main.copyRound();JOptionPane.showMessageDialog(frame, "Copied to clipboard");});
         generateMatches.addActionListener(a -> {
             try {
@@ -203,6 +208,30 @@ public class GUIView
         frame.setSize(1280, 720);
         frame.setLocationRelativeTo(null);
 
+        refreshTimer();
+
+    }
+
+    private void refreshTimer() {
+        Timer timer = new Timer(2000, e -> {
+            Main.refreshCurrentMatch();
+            setMatchStatus(Main.isCurrentMatch);
+
+            if (!matchStatus) {
+                endMatches.setVisible(false);
+                cancelMatches.setVisible(false);
+                copyMatches.setVisible(false);
+                copyUnfinished.setVisible(false);
+            }
+            else
+            {
+                endMatches.setVisible(true);
+                cancelMatches.setVisible(true);
+                copyMatches.setVisible(true);
+                copyUnfinished.setVisible(true);
+            }
+        });
+        timer.start();
     }
 
     public void show()
