@@ -80,7 +80,7 @@ public class GUIView
             if (result == JOptionPane.YES_OPTION)
             {
                 Main.wipeData();
-                _teamsManager.addSeedAndCreateTeams();
+                _teamsManager.addSeedAndCreateTeams(game);
             }}
             );
 

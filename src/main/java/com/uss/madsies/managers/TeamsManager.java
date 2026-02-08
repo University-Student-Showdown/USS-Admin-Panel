@@ -2,6 +2,7 @@ package com.uss.madsies.managers;
 
 import com.uss.madsies.Main;
 import com.uss.madsies.SeedingTools;
+import com.uss.madsies.data.Game;
 import com.uss.madsies.data.TeamData;
 
 import java.awt.*;
@@ -17,7 +18,7 @@ public class TeamsManager
 {
     public List<TeamData> teamsInfo = new ArrayList<>();
     public HashMap<String, List<Integer>> teamPlayers = new HashMap<>();
-    private SheetsManager _sheetsManager;
+    private final SheetsManager _sheetsManager;
 
     public TeamsManager(SheetsManager sheetsManager)
     {
@@ -126,9 +127,9 @@ public class TeamsManager
         }
     }
 
-    public void addSeedAndCreateTeams()
+    public void addSeedAndCreateTeams(Game game)
     {
-        HashMap<String, Double> rankings = calculateSeedingRanks();
+        HashMap<String, Double> rankings = calculateSeedingRanks(game);
 
         updateTeamPlayers();
 
@@ -137,11 +138,11 @@ public class TeamsManager
             teamsInfo.add(new TeamData(entry.getKey(), entry.getValue()){{players=teamPlayers.get(entry.getKey());}});
         }
 
-        grantSeedingWins();
+        grantSeedingWins(game);
         Main.rewriteData();
     }
 
-    public HashMap<String, Double> calculateSeedingRanks()
+    public HashMap<String, Double> calculateSeedingRanks(Game game)
     {
         Main.getFullData();
         List<List<Object>> seedData = _sheetsManager.fetchData(Main.ADMIN_SHEET, "Seeding!A1:G");
@@ -157,7 +158,7 @@ public class TeamsManager
             ArrayList<Integer> ranks = (ArrayList<Integer>) new ArrayList<>(row.subList(2, row.size()))
                     .stream().map(o -> Integer.parseInt(o.toString())).collect(Collectors.toList());
 
-            double rating = SeedingTools.calculateWeightedSeed(ranks);
+            double rating = SeedingTools.calculateWeightedSeed(ranks, game);
             rankings.put(name, rating);
             rawRankings.add(new ArrayList<>(Collections.singleton(rating)));
         }
@@ -175,9 +176,18 @@ public class TeamsManager
 
      */
 
-    public void grantSeedingWins()
+    public void grantSeedingWins(Game game)
     {
-        List<Integer> thresholds = List.of(24, 48, 72);//SeedingTools.calcSeedingThresholds(teamsInfo.size());
+        List<Integer> thresholds = new ArrayList<>();
+        if (game == Game.OVERWATCH) {
+            thresholds.add(24); //List.of(24, 48, 72); //SeedingTools.calcSeedingThresholds(teamsInfo.size());
+            thresholds.add(48);
+            thresholds.add(72);
+        }
+        else
+        {
+            thresholds = SeedingTools.calcSeedingThresholds(teamsInfo.size());//List.of(0, 32, 64);
+        }
 
         sortTeams(true);
         int count = 0;

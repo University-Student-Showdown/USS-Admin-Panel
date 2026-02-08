@@ -154,7 +154,6 @@ public class RoundManager
             matches.get(match).score2 = Integer.parseInt(row.get(3).toString());
             match++;
         }
-        System.out.println(matches);
     }
 
     public List<MatchUp> getMatches()

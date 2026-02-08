@@ -228,6 +228,7 @@ public class MatchesGUI {
         public Object getValueAt(int rowIndex, int columnIndex)
         {
             MatchUp m = matches.get(rowIndex);
+            if (m.team1 == null) return null;
             return switch (columnIndex)
             {
                 case 0 -> m.team1.seedingRank;

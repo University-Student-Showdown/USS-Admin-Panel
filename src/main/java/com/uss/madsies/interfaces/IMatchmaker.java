@@ -1,4 +1,6 @@
 package com.uss.madsies.interfaces;
 
-public interface IMatchmaker {
+public interface IMatchmaker
+{
+    
 }
