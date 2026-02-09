@@ -57,7 +57,7 @@ public class SeedingTools
             weightedScore = (float) Math.floor
                     (data.get(0)*1f + data.get(1) * 1f + data.get(2)) / 3.0f;
 
-            flatWeightedScore = (data.get(0) + data.get(1) + data.get(2)) / 3.0f;
+            flatWeightedScore = (float) Math.floor((data.get(0) + data.get(1) + data.get(2)) / 3.0f);
         }
 
         if (flatWeightedScore >= WEIGHT_CAP)
@@ -93,8 +93,6 @@ public class SeedingTools
         }
         return 0;
     }
-
-
 
     /**
      *  Returns a list of cutoffs of teams that gain seeding points

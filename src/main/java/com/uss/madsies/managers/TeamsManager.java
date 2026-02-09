@@ -183,37 +183,39 @@ public class TeamsManager
             thresholds.add(24); //List.of(24, 48, 72); //SeedingTools.calcSeedingThresholds(teamsInfo.size());
             thresholds.add(48);
             thresholds.add(72);
+
+
+            int count = 0;
+            for (TeamData t : teamsInfo)
+            {
+                count++;
+                if (count <= thresholds.getFirst())
+                {
+                    t.addWins(3);
+                    continue;
+                }
+                if (count <= thresholds.get(1))
+                {
+                    t.addWins(2);
+                    t.losses += 1;
+                    continue;
+                }
+                if (count <= thresholds.get(2)) {
+                    t.addWins(1);
+                    t.losses += 2;
+                }
+                if (count > thresholds.get(2))
+                {
+                    t.losses += 3;
+                }
+            }
         }
         else
         {
-            thresholds = SeedingTools.calcSeedingThresholds(teamsInfo.size());//List.of(0, 32, 64);
+            sortTeams(true);
         }
 
-        sortTeams(true);
-        int count = 0;
-        for (TeamData t : teamsInfo)
-        {
-            count++;
-            if (count <= thresholds.getFirst())
-            {
-                t.addWins(3);
-                continue;
-            }
-            if (count <= thresholds.get(1))
-            {
-                t.addWins(2);
-                t.losses += 1;
-                continue;
-            }
-            if (count <= thresholds.get(2)) {
-                t.addWins(1);
-                t.losses += 2;
-            }
-            if (count > thresholds.get(2))
-            {
-                t.losses += 3;
-            }
-        }
+
     }
 
     public void updateOMWP() {
