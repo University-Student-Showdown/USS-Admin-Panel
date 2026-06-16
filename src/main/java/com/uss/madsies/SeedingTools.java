@@ -43,21 +43,35 @@ public class SeedingTools
         float weightedScore = 0;
         float flatWeightedScore = 0;
         data = sortByRank(data);
-        if (game == Game.OVERWATCH)
-        {
-            WEIGHT_CAP = 4000;
-            weightedScore = (float) Math.floor
-                    (data.get(0)*2.0f + data.get(1) * 1.5f + data.get(2) * 1.25f + data.get(3)+data.get(4)) / 6.75f;
 
-            flatWeightedScore = (data.get(0) + data.get(1) + data.get(2) + data.get(3) + data.get(4)) / 5.0f;
-        }
-        else
-        {
-            WEIGHT_CAP = 0;
-            weightedScore = (float) Math.floor
-                    (data.get(0)*1f + data.get(1) * 1f + data.get(2)) / 3.0f;
+        switch (game){
+            case Game.OVERWATCH ->
+            {
+                WEIGHT_CAP = 4000;
+                weightedScore = (float) Math.floor
+                        (data.get(0)*2.0f + data.get(1) * 1.5f + data.get(2) * 1.25f + data.get(3)+data.get(4)) / 6.75f;
 
-            flatWeightedScore = (float) Math.floor((data.get(0) + data.get(1) + data.get(2)) / 3.0f);
+                flatWeightedScore = (data.get(0) + data.get(1) + data.get(2) + data.get(3) + data.get(4)) / 5.0f;
+            }
+            case Game.ROCKET_LEAGUE ->
+            {
+                weightedScore = (float) Math.floor
+                        (data.get(0)*1f + data.get(1) * 1f + data.get(2)) / 3.0f;
+
+                flatWeightedScore = (float) Math.floor((data.get(0) + data.get(1) + data.get(2)) / 3.0f);
+            }
+            case Game.DEADLOCK ->
+            {
+                weightedScore = (float) Math.floor(data.get(0) + data.get(1) + data.get(2) + data.get(3) + data.get(4) + data.get(5)) / 6.0f;
+
+                flatWeightedScore = (data.get(0) + data.get(1) + data.get(2) + data.get(3) + data.get(4) + data.get(5)) / 6.0f;
+            }
+            case Game.VALORANT ->
+            {
+                weightedScore = (float) Math.floor(data.get(0) + data.get(1) + data.get(2) + data.get(3) + data.get(4) / 5.0f);
+
+                flatWeightedScore = (data.get(0) + data.get(1) + data.get(2) + data.get(3) + data.get(4)) / 5.0f;
+            }
         }
 
         if (flatWeightedScore >= WEIGHT_CAP)

@@ -21,6 +21,8 @@ public class Matchmaker {
         List<TeamData> currentPool = new ArrayList<>();
         TeamData downFloat = null;
         int bracketWins = -1;
+        int teamCount = teamData.size();
+        int currentSize = 0;
 
         for (TeamData team : teamData) {
             if (!team.checkedIn) continue;
@@ -34,6 +36,8 @@ public class Matchmaker {
 
                 downFloat = handlePool(currentPool, matchups, downFloat != null);
 
+                currentSize = currentPool.size() + 1;
+
                 currentPool = new ArrayList<>();
                 bracketWins = team.wins;
             }
@@ -41,10 +45,18 @@ public class Matchmaker {
             currentPool.add(team);
         }
 
+        // Complainer fix, if a team is dropping below 25% and at least 12of the teams, they get a bye
         if (downFloat != null) {
-            currentPool.add(0, downFloat);
-        }
+            if (currentSize > teamCount/4 && currentSize >= 12)
+            {
+                matchups.add(new MatchUp(downFloat, new TeamData("BYE", -1)));
+            }
+            else
+            {
+                currentPool.add(0, downFloat);
+            }
 
+        }
         downFloat = handlePool(currentPool, matchups, downFloat != null);
 
         // If something still remains, give it a BYE

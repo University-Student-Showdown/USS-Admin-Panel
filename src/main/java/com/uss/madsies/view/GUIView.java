@@ -104,7 +104,7 @@ public class GUIView
         copyMatches.addActionListener(a -> {_roundManager.copyRound();JOptionPane.showMessageDialog(frame, "Copied to clipboard");});
         generateMatches.addActionListener(a -> {
             try {
-                _roundManager.generateRound();
+                _roundManager.generateRound(game);
                 endMatches.setVisible(true);
                 cancelMatches.setVisible(true);
                 copyMatches.setVisible(true);

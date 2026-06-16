@@ -33,9 +33,10 @@ public class Main {
         PUBLIC_SHEET = sheetsManager.getPublicSheet();
 
         teamManager = new TeamsManager(sheetsManager);
+        getFullData();
         roundManager = new RoundManager(sheetsManager, teamManager);
 
-        getFullData();
+
 
         // Initialise GUI
         SwingUtilities.invokeLater(() -> {

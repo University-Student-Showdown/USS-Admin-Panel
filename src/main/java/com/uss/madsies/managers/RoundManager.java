@@ -2,6 +2,7 @@ package com.uss.madsies.managers;
 
 import com.uss.madsies.Main;
 import com.uss.madsies.Matchmaker;
+import com.uss.madsies.data.Game;
 import com.uss.madsies.data.MatchUp;
 import com.uss.madsies.data.TeamData;
 
@@ -33,7 +34,7 @@ public class RoundManager
     }
 
     // Do this when matches are needed to be generated
-    public void generateRound() throws IOException
+    public void generateRound(Game game) throws IOException
     {
         if (isCurrentMatch) {
             throw new RuntimeException("Round is already currently running..");
@@ -42,7 +43,7 @@ public class RoundManager
         Main.getFullData();
         matches = Matchmaker.createSwissMatchups(_teamsManager.teamsInfo);
         _sheetsManager.createNewSheet();
-        writeMatchupSheet(matches);
+        writeMatchupSheet(matches, game);
 
         _sheetsManager.writeMatchFlag(true);
         isCurrentMatch = true;
@@ -184,9 +185,14 @@ public class RoundManager
         }
     }
 
-    public void writeMatchupSheet(List<MatchUp> matches) throws IOException
+    public void writeMatchupSheet(List<MatchUp> matches, Game game) throws IOException
     {
         int num = _sheetsManager.getSheetNumber();
+        int SCORE = 1; // DL and Val
+
+        if (game == Game.OVERWATCH) SCORE = 2;
+        if (game == Game.ROCKET_LEAGUE) SCORE = 3;
+
         String range = "Match_"+num+"!A1";
         List<List<Object>> values = new ArrayList<>();
 
@@ -199,8 +205,8 @@ public class RoundManager
             // Auto filling in bye scores
             int scoreA = 0;
             int scoreB = 0;
-            if (match.team1.teamName.equals("BYE")) scoreB = 2;
-            if (match.team2.teamName.equals("BYE")) scoreA = 2;
+            if (match.team1.teamName.equals("BYE")) scoreB = SCORE;
+            if (match.team2.teamName.equals("BYE")) scoreA = SCORE;
 
             values.add(Arrays.asList(match.team1.teamName, match.team2.teamName, scoreA, scoreB, match.team1.seedingRank, match.team2.seedingRank));
         }
@@ -214,7 +220,6 @@ public class RoundManager
     {
         for (TeamData team : _teamsManager.teamsInfo) {
             if (team.teamName.equals(name)) return team;
-
         }
         return null;
     }

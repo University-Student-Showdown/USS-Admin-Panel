@@ -145,7 +145,7 @@ public class TeamsManager
     public HashMap<String, Double> calculateSeedingRanks(Game game)
     {
         Main.getFullData();
-        List<List<Object>> seedData = _sheetsManager.fetchData(Main.ADMIN_SHEET, "Seeding!A1:G");
+        List<List<Object>> seedData = _sheetsManager.fetchData(Main.ADMIN_SHEET, "Seeding!A1:H");
 
         HashMap<String, Double> rankings = new HashMap<>();
         List<List<Object>> rawRankings = new ArrayList<>();
@@ -179,42 +179,48 @@ public class TeamsManager
     public void grantSeedingWins(Game game)
     {
         List<Integer> thresholds = new ArrayList<>();
-        if (game == Game.OVERWATCH) {
-            thresholds.add(24); //List.of(24, 48, 72); //SeedingTools.calcSeedingThresholds(teamsInfo.size());
-            thresholds.add(48);
-            thresholds.add(72);
 
-
-            int count = 0;
-            for (TeamData t : teamsInfo)
+        switch (game)
+        {
+            case Game.OVERWATCH ->
             {
-                count++;
-                if (count <= thresholds.getFirst())
-                {
-                    t.addWins(3);
-                    continue;
-                }
-                if (count <= thresholds.get(1))
-                {
-                    t.addWins(2);
-                    t.losses += 1;
-                    continue;
-                }
-                if (count <= thresholds.get(2)) {
-                    t.addWins(1);
-                    t.losses += 2;
-                }
-                if (count > thresholds.get(2))
-                {
-                    t.losses += 3;
-                }
+                thresholds.add(24); //List.of(24, 48, 72); //SeedingTools.calcSeedingThresholds(teamsInfo.size());
+                thresholds.add(48);
+                thresholds.add(72);
+            }
+            case Game.DEADLOCK, Game.VALORANT, Game.ROCKET_LEAGUE ->
+            {
+                thresholds.add(0);
+                thresholds.add(0);
+                thresholds.add(0);
             }
         }
-        else
-        {
-            sortTeams(true);
-        }
 
+        int count = 0;
+        for (TeamData t : teamsInfo)
+        {
+            count++;
+            if (count <= thresholds.getFirst())
+            {
+                t.addWins(3);
+                continue;
+            }
+            if (count <= thresholds.get(1))
+            {
+                t.addWins(2);
+                t.losses += 1;
+                continue;
+            }
+            if (count <= thresholds.get(2)) {
+                t.addWins(1);
+                t.losses += 2;
+            }
+            if (count > thresholds.get(2))
+            {
+                t.losses += 3;
+            }
+        }
+        sortTeams(true);
 
     }
 
@@ -251,7 +257,7 @@ public class TeamsManager
 
 
                 int totalGames = oppWins + oppLosses;
-                if (totalGames == 0 || totalGames < roundNumber+1) continue;
+                if (totalGames == 0 || totalGames < roundNumber/2) continue;
 
                 double winPct = (double) oppWins / totalGames;
                 sum += winPct;
