@@ -190,35 +190,25 @@ public class TeamsManager
             }
             case Game.DEADLOCK, Game.VALORANT, Game.ROCKET_LEAGUE ->
             {
-                thresholds.add(0);
-                thresholds.add(0);
-                thresholds.add(0);
             }
         }
 
         int count = 0;
+        int thresholdCount = thresholds.size();
         for (TeamData t : teamsInfo)
         {
             count++;
-            if (count <= thresholds.getFirst())
-            {
-                t.addWins(3);
-                continue;
+            int bucket = thresholdCount;
+
+            for (int i = 0; i < thresholdCount; i++) {
+                if (count <= thresholds.get(i)) {
+                    bucket = i;
+                    break;
+                }
             }
-            if (count <= thresholds.get(1))
-            {
-                t.addWins(2);
-                t.losses += 1;
-                continue;
-            }
-            if (count <= thresholds.get(2)) {
-                t.addWins(1);
-                t.losses += 2;
-            }
-            if (count > thresholds.get(2))
-            {
-                t.losses += 3;
-            }
+
+            t.addWins(Math.max(thresholdCount - bucket, 0));
+            t.losses += Math.max(bucket, 0);
         }
         sortTeams(true);
 
