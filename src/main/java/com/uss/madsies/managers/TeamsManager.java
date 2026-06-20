@@ -207,8 +207,17 @@ public class TeamsManager
             if (row.isEmpty()) continue;
             String name = row.getFirst().toString();
             if (name.isEmpty()) continue;
-            ArrayList<Integer> ranks = (ArrayList<Integer>) new ArrayList<>(row.subList(2, row.size()))
-                    .stream().map(o -> Integer.parseInt(o.toString())).collect(Collectors.toList());
+            ArrayList<Integer> ranks;
+            try {
+                 ranks = (ArrayList<Integer>) new ArrayList<>(row.subList(2, row.size()))
+                        .stream().map(o -> Integer.parseInt(o.toString())).collect(Collectors.toList());
+
+            }
+            catch (Exception e)
+            {
+                ranks = new ArrayList<>(){};
+            }
+
 
             double rating = SeedingTools.calculateWeightedSeed(ranks, game);
             rankings.put(name, rating);
@@ -238,7 +247,6 @@ public class TeamsManager
             {
                 thresholds.add(24); //List.of(24, 48, 72); //SeedingTools.calcSeedingThresholds(teamsInfo.size());
                 thresholds.add(48);
-                thresholds.add(72);
             }
             case Game.DEADLOCK, Game.VALORANT, Game.ROCKET_LEAGUE ->
             {
@@ -261,6 +269,8 @@ public class TeamsManager
 
             t.setWins(Math.max(thresholdCount - bucket, 0));
             t.losses = Math.max(bucket, 0);
+            t.map_wins = 0;
+            t.map_losses = 0;
         }
         sortTeams(true);
 
