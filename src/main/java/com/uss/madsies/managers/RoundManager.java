@@ -2,6 +2,7 @@ package com.uss.madsies.managers;
 
 import com.uss.madsies.Main;
 import com.uss.madsies.Matchmaker;
+import com.uss.madsies.SeedingTools;
 import com.uss.madsies.data.Game;
 import com.uss.madsies.data.MatchUp;
 import com.uss.madsies.data.TeamData;
@@ -86,6 +87,16 @@ public class RoundManager
 
         _sheetsManager.writeMatchFlag(false);
         isCurrentMatch = false;
+    }
+
+    public void fullReloadStandings(Game game) throws IOException
+    {
+        _teamsManager.grantSeedingWins(game);
+        _teamsManager.updateFullRecords();
+        updateHistory(matches, _sheetsManager.getSheetNumber());
+        _teamsManager.updateOMWP();
+        _teamsManager.sortTeams(false);
+        Main.rewriteData();
     }
 
     /**

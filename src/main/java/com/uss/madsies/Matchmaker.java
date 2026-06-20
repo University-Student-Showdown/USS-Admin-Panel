@@ -6,6 +6,46 @@ import com.uss.madsies.data.TeamData;
 import java.util.*;
 
 public class Matchmaker {
+
+    public static List<MatchUp> createRoundRobinRound(List<TeamData> teamData, int round)
+    {
+        List<MatchUp> matchups = new ArrayList<>();
+
+        List<TeamData> teams = teamData.stream()
+                .sorted(Comparator.comparing(t -> t.teamName.toLowerCase()))
+                .toList();
+
+        // Add BYE if odd
+        if (teams.size() % 2 != 0) {
+            teams.add(new TeamData("BYE", -1));
+        }
+
+        int n = teams.size();
+
+        // rotated arrangement
+        List<TeamData> arrangement = new ArrayList<>(Collections.nCopies(n, null));
+
+        // First fixed
+        arrangement.set(0, teams.get(0));
+
+        // Rotate rest
+        for (int i = 1; i < n; i++) {
+            int pos = 1 + ((i - 1 + round) % (n - 1));
+            arrangement.set(pos, teams.get(i));
+        }
+
+        // Pair opposites
+        for (int i = 0; i < n / 2; i++) {
+            TeamData a = arrangement.get(i);
+            TeamData b = arrangement.get(n - 1 - i);
+
+            matchups.add(new MatchUp(a, b));
+        }
+
+        return matchups;
+    }
+
+
     /*
         // Pool teams by number of wins
         // Place 1st in pool vs last in pool

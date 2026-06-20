@@ -116,6 +116,12 @@ public class TeamData
         this.score += count*3;
     }
 
+    public void setWins(int count)
+    {
+        this.wins = count;
+        this.score = count*3;
+    }
+
     public void setCheckedIn(boolean ci)
     {
         checkedIn = ci;

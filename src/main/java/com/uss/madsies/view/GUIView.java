@@ -68,6 +68,15 @@ public class GUIView
             }
         });
 
+        JButton recalc = new JButton("Recalculate/Update Standings");
+        recalc.addActionListener(a -> {
+            try {
+                _roundManager.fullReloadStandings(game);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(frame, e.getMessage());
+            }
+        });
+
         JButton reset = new JButton("Reset Datasheet");
         reset.addActionListener(a -> {
             int result = JOptionPane.showConfirmDialog(
@@ -92,6 +101,7 @@ public class GUIView
 
         sortingPanel.add(sortSeeding);
         sortingPanel.add(sortPlacement);
+        sortingPanel.add(recalc);
         sortingPanel.add(reset);
         sortingPanel.add(setAllCheckIn);
         sortingPanel.add(setAllCheckOut);

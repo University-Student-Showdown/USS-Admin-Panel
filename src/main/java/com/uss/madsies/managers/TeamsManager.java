@@ -75,6 +75,58 @@ public class TeamsManager
 
     }
 
+    public void updateFullRecords() throws IOException
+    {
+        int num = _sheetsManager.getSheetNumber();
+        for (int i = 1; i <= num; i++)
+        {
+            String range = "Match_"+i+"!A2:D";
+
+            List<List<Object>> data = _sheetsManager.fetchData(Main.ADMIN_SHEET, range);
+
+            Map<String, TeamData> teamMap = new HashMap<>();
+            for (TeamData t : teamsInfo)
+            {
+                teamMap.put(t.teamName, t);
+            }
+
+            for (List<Object> row : data)
+            {
+                if (row.size() < 4) continue; // skip incomplete rows
+
+                String teamA = row.get(0).toString();
+                String teamB = row.get(1).toString();
+
+                int scoreA = Integer.parseInt(row.get(2).toString());
+                int scoreB = Integer.parseInt(row.get(3).toString());
+
+                if (Objects.equals(teamA, "BYE"))
+                {
+                    teamMap.get(teamB).addWins(1);
+                    teamMap.get(teamB).map_wins += 2;
+                    continue;
+                }
+                else if (Objects.equals(teamB, "BYE"))
+                {
+                    teamMap.get(teamA).addWins(1);
+                    teamMap.get(teamA).map_wins += 2;
+                    continue;
+                }
+                else if (scoreA > scoreB) {
+                    teamMap.get(teamA).addWins(1);
+                    teamMap.get(teamB).losses++;
+                } else if (scoreB > scoreA) {
+                    teamMap.get(teamB).addWins(1);
+                    teamMap.get(teamA).losses++;
+                }
+                teamMap.get(teamA).map_wins += scoreA;
+                teamMap.get(teamB).map_wins += scoreB;
+                teamMap.get(teamA).map_losses += scoreB;
+                teamMap.get(teamB).map_losses += scoreA;
+            }
+        }
+    }
+
     public void sortTeams(boolean seeding)
     {
         /*
@@ -207,8 +259,8 @@ public class TeamsManager
                 }
             }
 
-            t.addWins(Math.max(thresholdCount - bucket, 0));
-            t.losses += Math.max(bucket, 0);
+            t.setWins(Math.max(thresholdCount - bucket, 0));
+            t.losses = Math.max(bucket, 0);
         }
         sortTeams(true);
 
