@@ -72,14 +72,14 @@ public class RoundManager
     }
 
     // Do this when all data is filled and all matches are done
-    public void endRound() throws IOException
+    public void endRound(Game game) throws IOException
     {
         if (!isCurrentMatch)
         {
             throw new RuntimeException("Round was not running..");
         }
 
-        _teamsManager.updateRecords();
+        _teamsManager.updateRecords(game);
         updateHistory(matches, _sheetsManager.getSheetNumber());
         _teamsManager.updateOMWP();
         _teamsManager.sortTeams(false);
@@ -92,7 +92,7 @@ public class RoundManager
     public void fullReloadStandings(Game game) throws IOException
     {
         _teamsManager.grantSeedingWins(game);
-        _teamsManager.updateFullRecords();
+        _teamsManager.updateFullRecords(game);
         updateHistory(matches, _sheetsManager.getSheetNumber());
         _teamsManager.updateOMWP();
         _teamsManager.sortTeams(false);

@@ -25,10 +25,15 @@ public class TeamsManager
         _sheetsManager = sheetsManager;
     }
 
-    public void updateRecords() throws IOException
+    public void updateRecords(Game game) throws IOException
     {
         int num = _sheetsManager.getSheetNumber();
         String range = "Match_"+num+"!A2:D";
+
+        int SCORE = 1; // DL and Val
+
+        if (game == Game.OVERWATCH) SCORE = 2;
+        if (game == Game.ROCKET_LEAGUE) SCORE = 3;
 
         List<List<Object>> data = _sheetsManager.fetchData(Main.ADMIN_SHEET, range);
 
@@ -51,13 +56,13 @@ public class TeamsManager
             if (Objects.equals(teamA, "BYE"))
             {
                 teamMap.get(teamB).addWins(1);
-                teamMap.get(teamB).map_wins += 2;
+                teamMap.get(teamB).map_wins += SCORE;
                 continue;
             }
             else if (Objects.equals(teamB, "BYE"))
             {
                 teamMap.get(teamA).addWins(1);
-                teamMap.get(teamA).map_wins += 2;
+                teamMap.get(teamA).map_wins += SCORE;
                 continue;
             }
             else if (scoreA > scoreB) {
@@ -75,9 +80,13 @@ public class TeamsManager
 
     }
 
-    public void updateFullRecords() throws IOException
+    public void updateFullRecords(Game game) throws IOException
     {
         int num = _sheetsManager.getSheetNumber();
+        int SCORE = 1; // DL and Val
+
+        if (game == Game.OVERWATCH) SCORE = 2;
+        if (game == Game.ROCKET_LEAGUE) SCORE = 3;
         for (int i = 1; i <= num; i++)
         {
             String range = "Match_"+i+"!A2:D";
@@ -103,13 +112,13 @@ public class TeamsManager
                 if (Objects.equals(teamA, "BYE"))
                 {
                     teamMap.get(teamB).addWins(1);
-                    teamMap.get(teamB).map_wins += 2;
+                    teamMap.get(teamB).map_wins += SCORE;
                     continue;
                 }
                 else if (Objects.equals(teamB, "BYE"))
                 {
                     teamMap.get(teamA).addWins(1);
-                    teamMap.get(teamA).map_wins += 2;
+                    teamMap.get(teamA).map_wins += SCORE;
                     continue;
                 }
                 else if (scoreA > scoreB) {
@@ -190,6 +199,8 @@ public class TeamsManager
             teamsInfo.add(new TeamData(entry.getKey(), entry.getValue()){{players=teamPlayers.get(entry.getKey());}});
         }
 
+
+        sortTeams(true);
         grantSeedingWins(game);
         Main.rewriteData();
     }
@@ -245,8 +256,7 @@ public class TeamsManager
         {
             case Game.OVERWATCH ->
             {
-                thresholds.add(24); //List.of(24, 48, 72); //SeedingTools.calcSeedingThresholds(teamsInfo.size());
-                thresholds.add(48);
+                thresholds.add(32); //List.of(24, 48, 72); //SeedingTools.calcSeedingThresholds(teamsInfo.size());
             }
             case Game.DEADLOCK, Game.VALORANT, Game.ROCKET_LEAGUE ->
             {
@@ -255,6 +265,7 @@ public class TeamsManager
 
         int count = 0;
         int thresholdCount = thresholds.size();
+
         for (TeamData t : teamsInfo)
         {
             count++;

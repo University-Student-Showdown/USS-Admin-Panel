@@ -147,7 +147,7 @@ public class GUIView
 
         if (result == JOptionPane.YES_OPTION) {
             try {
-                _roundManager.endRound();
+                _roundManager.endRound(game);
                 endMatches.setVisible(false);
                 cancelMatches.setVisible(false);
                 copyMatches.setVisible(false);
